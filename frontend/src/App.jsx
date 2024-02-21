@@ -7,9 +7,13 @@ function App() {
   const [selectedOption, setSelectedOption] = useState('text')
   const [inputText, setInputText] = useState('')
   const [selectedChiper, setSelectedChiper] = useState('vignere')
+  
   const [key, setKey] = useState('')
   const [keyM, setKeyM] = useState('')
   const [keyB, setKeyB] = useState('')
+  const [keyMatrixSize, setKeyMatrixSize] = useState(0)
+  const [keyMatrix, setKeyMatrix] = useState([[]])
+
   const [outputText, setOutputText] = useState('')
 
   const handleOptionChange = (e) => {
@@ -35,6 +39,21 @@ function App() {
   const handleKeyBChange = (e) => {
     setKeyB(e.target.value)
   } 
+
+  const handleKeyMatrixSizeChange = (e) => {
+    setKeyMatrixSize(e.target.value)
+
+    // Initialize key matrix
+    const matrix = Array.from({length: e.target.value}, () => Array.from({length: e.target.value}, () => 0))
+    setKeyMatrix(matrix)
+  }
+
+  const handleKeyMatrixChange = (e, rowIndex, colIndex) => {
+    const value = parseInt(e.target.value);
+    const matrix = [...keyMatrix];
+    matrix[rowIndex][colIndex] = isNaN(value) ? 0 : value;
+    setKeyMatrix(matrix);
+  }
 
   const handleEncryptClick = () => {
     console.log("Encrypting", inputText, key)
@@ -66,6 +85,18 @@ function App() {
         break
       case 'affine':
         axios.post(`http://127.0.0.1:5000/affine/encrypt`,{plain_text: inputText, m: parseInt(keyM), b:parseInt(keyB)}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.encrypted_text)
+        });
+        break
+      case 'hill':
+        axios.post(`http://127.0.0.1:5000/hill/encrypt`,{plain_text: inputText, key: keyMatrix}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.encrypted_text)
+        });
+        break
+      case 'super-encryption':
+        axios.post(`http://127.0.0.1:5000/super/encrypt`,{plain_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
         });
@@ -108,6 +139,18 @@ function App() {
           setOutputText(res.data.decrypted_text)
         });
         break
+      case 'hill':
+        axios.post(`http://127.0.0.1:5000/hill/decrypt`,{cipher_text: inputText,  key: keyMatrix}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.decrypted_text)
+        });
+        break
+      case 'super-encryption':
+        axios.post(`http://127.0.0.1:5000/super/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.decrypted_text)
+        });
+        break
     }
     console.log("result : ", outputText)
   }
@@ -145,6 +188,7 @@ function App() {
               <option value="playfair">Playfair Chiper</option>
               <option value="affine">Affine Chiper</option>
               <option value="hill">Hill Chiper</option>
+              <option value="super-encryption">Super Encryption</option>
             </select>
           </label>
           {selectedChiper === 'affine' && (
@@ -156,10 +200,27 @@ function App() {
             </label>
           )}
           {selectedChiper === 'hill' && (
-            <label className='input-key'>
-              Key:
-              <input type="text" value={key} onChange={handleKeyChange}/>
+            <div className='input-key'>
+            <label>
+              Key Matrix size:<br/>
+              <input type="text" value={keyMatrixSize} onChange={handleKeyMatrixSizeChange}/>
+              <br/>Matrix :
             </label>
+            <div className='matrix-hill'>
+              {keyMatrix.map((row, rowIndex) => (
+                <div key={rowIndex}>
+                  {row.map((cell, colIndex) => (
+                    <input
+                      key={colIndex}
+                      type="text"
+                      value={cell}
+                      onChange={(e) => handleKeyMatrixChange(e, rowIndex, colIndex)}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
           
           )}
           {selectedChiper !== 'affine' && selectedChiper !== 'hill' && (
