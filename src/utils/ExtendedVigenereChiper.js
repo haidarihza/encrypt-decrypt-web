@@ -11,9 +11,9 @@ export function ExtendedVigenereEncrypt(plainText, key) {
   return btoa(encryptedText);
 }
 
-export function ExtendedVigenereDecrypt(chiperText, key) {
+export function ExtendedVigenereDecrypt(cipherText, key) {
   //convert encrypted text from base 64
-  let encryptedText = atob(chiperText);
+  let encryptedText = atob(cipherText);
 
   //decrypt the text
   let plainText = "";

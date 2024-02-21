@@ -61,10 +61,10 @@ export function PlayfairEncrypt(plainText, key) {
   return btoa(encryptedText);
 }
 
-export function PlayfairDecrypt(chiperText, key) {
+export function PlayfairDecrypt(cipherText, key) {
   //convert encrypted text from base 64
-  let encryptedText = atob(chiperText);
-  //make sure the key and chipertext is in uppercase
+  let encryptedText = atob(cipherText);
+  //make sure the key and cipherText is in uppercase
   encryptedText = encryptedText.toUpperCase();
   key = key.toUpperCase();
 

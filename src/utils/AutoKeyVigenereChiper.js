@@ -18,10 +18,10 @@ export function AutoKeyVigenereEncrypt(plainText, key) {
   return btoa(encryptedText);
 }
 
-export function AutoKeyVigenereDecrypt(chiperText, key) {
+export function AutoKeyVigenereDecrypt(cipherText, key) {
   //convert encrypted text from base 64
-  let encryptedText = atob(chiperText);
-  //make sure the key and chipertext is in uppercase
+  let encryptedText = atob(cipherText);
+  //make sure the key and cipherText is in uppercase
   encryptedText = encryptedText.toUpperCase();
   key = key.toUpperCase();
 
