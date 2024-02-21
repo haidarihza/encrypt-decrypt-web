@@ -4,6 +4,7 @@ import {VigenereEncrypt, VigenereDecrypt} from './utils/VigenereChiper.js'
 import {AutoKeyVigenereEncrypt, AutoKeyVigenereDecrypt} from './utils/AutoKeyVigenereChiper.js'
 import {ExtendedVigenereEncrypt, ExtendedVigenereDecrypt} from './utils/ExtendedVigenereChiper.js'
 import {PlayfairEncrypt, PlayfairDecrypt} from './utils/PlayfairChiper.js'
+import {saveBinaryFile} from './utils/saveBinaryFile.js'
 
 function App() {
   const [selectedOption, setSelectedOption] = useState('text')
@@ -72,6 +73,11 @@ function App() {
     console.log("result : ", outputText)
   }
 
+  const handleSaveBinaryFile = () => {
+    console.log("Save as binary file", outputText)
+    saveBinaryFile(outputText, "output.bin")
+  }
+
   return (
     <>
     <div className='title'>
@@ -117,6 +123,9 @@ function App() {
             <label>
               Output: {outputText}
             </label>
+          </div>
+          <div className='buttons'>
+            <button onClick={handleSaveBinaryFile}>save as binary file</button>
           </div>
         </div>
       ) : (
