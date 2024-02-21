@@ -15,7 +15,7 @@ def home():
 @app.route('/vigenere/encrypt', methods=['POST'])
 @cross_origin()
 def vigenerEncryptRoute():
-  data = request.get_json()
+  data = request.get_json(force=True)
   plain_text = data['plain_text']
   key = data['key']
   encrypted_text = vigenereEncrypt(plain_text, key)
@@ -24,7 +24,7 @@ def vigenerEncryptRoute():
 @app.route('/vigenere/decrypt', methods=['POST'])
 @cross_origin()
 def vigenerDecryptRoute():
-  data = request.get_json()
+  data = request.get_json(force=True)
   cipher_text = data['cipher_text']
   key = data['key']
   decrypted_text = vigenereDecrypt(cipher_text, key)
