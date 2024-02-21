@@ -1,16 +1,15 @@
 import { useState } from 'react'
 import './App.css'
-import {VigenereEncrypt, VigenereDecrypt} from './utils/VigenereChiper.js'
-import {AutoKeyVigenereEncrypt, AutoKeyVigenereDecrypt} from './utils/AutoKeyVigenereChiper.js'
-import {ExtendedVigenereEncrypt, ExtendedVigenereDecrypt} from './utils/ExtendedVigenereChiper.js'
-import {PlayfairEncrypt, PlayfairDecrypt} from './utils/PlayfairChiper.js'
 import {saveBinaryFile} from './utils/saveBinaryFile.js'
+import axios from 'axios'
 
 function App() {
   const [selectedOption, setSelectedOption] = useState('text')
   const [inputText, setInputText] = useState('')
   const [selectedChiper, setSelectedChiper] = useState('vignere')
   const [key, setKey] = useState('')
+  const [keyM, setKeyM] = useState('')
+  const [keyB, setKeyB] = useState('')
   const [outputText, setOutputText] = useState('')
 
   const handleOptionChange = (e) => {
@@ -29,24 +28,48 @@ function App() {
     setKey(e.target.value)
   }
 
+  const handleKeyMChange = (e) => {
+    setKeyM(e.target.value)
+  }
+
+  const handleKeyBChange = (e) => {
+    setKeyB(e.target.value)
+  } 
+
   const handleEncryptClick = () => {
     console.log("Encrypting", inputText, key)
 
     switch(selectedChiper) {
       case 'vignere':
-        setOutputText(VigenereEncrypt(inputText, key))
+        axios.post(`http://127.0.0.1:5000/vigenere/encrypt`,{plain_text: inputText, key: key}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.encrypted_text)
+        });
         break
       case 'auto-key-vignere':
-        setOutputText(AutoKeyVigenereEncrypt(inputText, key))
+        axios.post(`http://127.0.0.1:5000/auto-key-vigenere/encrypt`,{plain_text: inputText, key: key}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.encrypted_text)
+        });
         break
       case 'extended-vignere':
-        setOutputText(ExtendedVigenereEncrypt(inputText, key))
+        axios.post(`http://127.0.0.1:5000/extended-vigenere/encrypt`,{plain_text: inputText, key: key}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.encrypted_text)
+        });
         break
       case 'playfair-vignere':
-        setOutputText(PlayfairEncrypt(inputText, key))
+        axios.post(`http://127.0.0.1:5000/playfair/encrypt`,{plain_text: inputText, key: key}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.encrypted_text)
+        });
         break
-      default:
-        setOutputText(VigenereEncrypt(inputText, key))
+      case 'affine':
+        axios.post(`http://127.0.0.1:5000/affine/encrypt`,{plain_text: inputText, m: parseInt(keyM), b:parseInt(keyB)}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.encrypted_text)
+        });
+        break
     }
     console.log("result : ", outputText)
   }
@@ -56,19 +79,35 @@ function App() {
 
     switch(selectedChiper) {
       case 'vignere':
-        setOutputText(VigenereDecrypt(inputText, key))
+        axios.post(`http://127.0.0.1:5000/vigenere/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.decrypted_text)
+        });
         break
       case 'auto-key-vignere':
-        setOutputText(AutoKeyVigenereDecrypt(inputText, key))
+        axios.post(`http://127.0.0.1:5000/auto-key-vigenere/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.decrypted_text)
+        });
         break
       case 'extended-vignere':
-        setOutputText(ExtendedVigenereDecrypt(inputText, key))
+        axios.post(`http://127.0.0.1:5000/extended-vigenere/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.decrypted_text)
+        });
         break
       case 'playfair-vignere':
-        setOutputText(PlayfairDecrypt(inputText, key))
+        axios.post(`http://127.0.0.1:5000/playfair/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.decrypted_text)
+        });
         break
-      default:
-        setOutputText(VigenereDecrypt(inputText, key))
+      case 'affine':
+        axios.post(`http://127.0.0.1:5000/affine/decrypt`,{cipher_text: inputText,  m: parseInt(keyM), b:parseInt(keyB)}).then((res) => {
+          console.log(res.data)
+          setOutputText(res.data.decrypted_text)
+        });
+        break
     }
     console.log("result : ", outputText)
   }
@@ -103,15 +142,32 @@ function App() {
               <option value="vignere">Vigenere Chiper</option>
               <option value="auto-key-vignere">Auto-Key Vignere Chiper</option>
               <option value="extended-vignere">Extended Vignere Chiper</option>
-              <option value="playfair-vignere">Playfair Chiper</option>
-              <option value="affine-vignere">Affine Chiper</option>
-              <option value="hill-vignere">Hill Chiper</option>
+              <option value="playfair">Playfair Chiper</option>
+              <option value="affine">Affine Chiper</option>
+              <option value="hill">Hill Chiper</option>
             </select>
           </label>
-          <label className='input-key'>
-            Key:
-            <input type="text" value={key} onChange={handleKeyChange}/>
-          </label>
+          {selectedChiper === 'affine' && (
+            <label className='input-key'>
+              Key m:
+              <input type="text" value={keyM} onChange={handleKeyMChange}/>
+              Key b:
+              <input type="text" value={keyB} onChange={handleKeyBChange}/>
+            </label>
+          )}
+          {selectedChiper === 'hill' && (
+            <label className='input-key'>
+              Key:
+              <input type="text" value={key} onChange={handleKeyChange}/>
+            </label>
+          
+          )}
+          {selectedChiper !== 'affine' && selectedChiper !== 'hill' && (
+            <label className='input-key'>
+              Key:
+              <input type="text" value={key} onChange={handleKeyChange}/>
+            </label>
+          )}
           <div className='buttons'>
             <button onClick={handleEncryptClick}>Encrypt</button>
             <button onClick={handleDecryptClick}>Decrypt</button>
