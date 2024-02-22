@@ -81,7 +81,7 @@ function App() {
           }
         });
         break
-      case 'playfair-vignere':
+      case 'playfair':
         axios.post(`http://127.0.0.1:5000/playfair/encrypt`,{plain_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
@@ -139,7 +139,7 @@ function App() {
           });
         }
         break
-      case 'playfair-vignere':
+      case 'playfair':
         axios.post(`http://127.0.0.1:5000/playfair/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.decrypted_text)
@@ -297,11 +297,12 @@ function App() {
           </div>
 
         {selectedOption === 'text' && (
-          <div className='content'>
-            <div className='output'>
-              <label>
-                Input: {inputText}
-              </label>
+          <div>
+            <div className='output' style={{ whiteSpace: 'pre-wrap' }}>
+            <div className='input-label' style={{ display: 'block' }}>
+              Input:
+                <span>{inputText}</span>
+              </div>
               <label>
                 Input base64: {btoa(inputText)}
               </label>

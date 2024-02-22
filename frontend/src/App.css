@@ -6,6 +6,7 @@
 .content {
   display: flex;
   flex-direction: column;
+  max-width: 620px;
 }
 
 .input-type {
@@ -74,11 +75,12 @@
   flex-direction: column;
   font-size: 16px;
   margin-top: 20px;
+  overflow: auto;
 }
 
 .output label {
   margin-bottom: 5px;
-
+  max-width: 620px;
 }
 
 .matrix-hill {
