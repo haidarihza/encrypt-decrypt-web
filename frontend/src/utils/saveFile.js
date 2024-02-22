@@ -26,6 +26,36 @@ export function saveBinaryFile(text, filename) {
 	URL.revokeObjectURL(link.href);
 }
 
+export function saveEncryptedFile(text, filename) {
+	console.log("masuk");
+	// const decodedBytes = atob(text);
+
+	console.log("masuk2");
+
+	// const encryptedBytes = new Uint8Array(decodedBytes.length);
+	// for (let i = 0; i < decodedBytes.length; i++) {
+	// 	encryptedBytes[i] = decodedBytes.charCodeAt(i);
+	// }
+
+	console.log("masuk3");
+
+	// Create a Blob object from the encrypted bytes
+	const blob = new Blob([text]);
+
+	// Create a temporary link element
+	const link = document.createElement("a");
+	link.href = URL.createObjectURL(blob);
+	link.download = filename;
+
+	console.log("sini");
+
+	// Trigger the download
+	link.click();
+
+	// Clean up the temporary link
+	URL.revokeObjectURL(link.href);
+}
+
 export function saveTextFile(text, filename) {
 	const blob = new Blob([text], { type: "text/plain" });
 

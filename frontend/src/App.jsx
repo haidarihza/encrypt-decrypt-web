@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import {saveBinaryFile, saveTextFile} from './utils/saveFile.js'
+import {saveBinaryFile, saveTextFile, saveEncryptedFile} from './utils/saveFile.js'
 import axios from 'axios'
 
 function App() {
@@ -64,52 +64,55 @@ function App() {
         axios.post(`http://127.0.0.1:5000/vigenere/encrypt`,{plain_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
+          if (selectedOption === 'file') {
+            saveTextFile(res.data.encrypted_text, filename)
+          }
         });
-        if (selectedOption === 'file') {
-          saveTextFile(outputText, filename)
-        }
         break
       case 'auto-key-vignere':
         axios.post(`http://127.0.0.1:5000/auto-key-vigenere/encrypt`,{plain_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
+          if (selectedOption === 'file') {
+            saveTextFile(res.data.encrypted_text, filename)
+          }
         });
-        if (selectedOption === 'file') {
-          saveTextFile(outputText, filename)
-        }
         break
       case 'extended-vignere':
         axios.post(`http://127.0.0.1:5000/extended-vigenere/encrypt`,{plain_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
+          if (selectedOption === 'file') {
+            saveEncryptedFile(res.data.encrypted_text, filename)
+          }
         });
         break
       case 'playfair-vignere':
         axios.post(`http://127.0.0.1:5000/playfair/encrypt`,{plain_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
+          if (selectedOption === 'file') {
+            saveTextFile(res.data.encrypted_text, filename)
+          }
         });
-        if (selectedOption === 'file') {
-          saveTextFile(outputText, filename)
-        }
         break
       case 'affine':
         axios.post(`http://127.0.0.1:5000/affine/encrypt`,{plain_text: inputText, m: parseInt(keyM), b:parseInt(keyB)}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
+          if (selectedOption === 'file') {
+            saveTextFile(res.data.encrypted_text, filename)
+          }
         });
-        if (selectedOption === 'file') {
-          saveTextFile(outputText, filename)
-        }
         break
       case 'hill':
         axios.post(`http://127.0.0.1:5000/hill/encrypt`,{plain_text: inputText, key: keyMatrix}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
+          if (selectedOption === 'file') {
+            saveTextFile(res.data.encrypted_text, filename)
+          }
         });
-        if (selectedOption === 'file') {
-          saveTextFile(outputText, filename)
-        }
         break
       case 'super-encryption':
         axios.post(`http://127.0.0.1:5000/super/encrypt`,{plain_text: inputText, key: key}).then((res) => {
@@ -131,7 +134,7 @@ function App() {
           setOutputText(res.data.decrypted_text)
         });
         if (selectedOption === 'file') {
-          saveTextFile(outputText, filename)
+          saveTextFile(res.data.decrypted_text, filename)
         }
         break
       case 'auto-key-vignere':
@@ -140,14 +143,23 @@ function App() {
           setOutputText(res.data.decrypted_text)
         });
         if (selectedOption === 'file') {
-          saveTextFile(outputText, filename)
+          saveTextFile(res.data.decrypted_text, filename)
         }
         break
       case 'extended-vignere':
-        axios.post(`http://127.0.0.1:5000/extended-vigenere/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
-          console.log(res.data)
-          setOutputText(res.data.decrypted_text)
-        });
+        if (selectedOption === 'file') {
+
+          axios.post(`http://127.0.0.1:5000/extended-vigenere/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
+            console.log(res.data)
+            setOutputText(res.data.decrypted_text)
+              saveEncryptedFile(res.data.decrypted_text, filename)
+          });
+        } else {
+          axios.post(`http://127.0.0.1:5000/extended-vigenere/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
+            console.log(res.data)
+            setOutputText(res.data.decrypted_text)
+          });
+        }
         break
       case 'playfair-vignere':
         axios.post(`http://127.0.0.1:5000/playfair/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
@@ -155,7 +167,7 @@ function App() {
           setOutputText(res.data.decrypted_text)
         });
         if (selectedOption === 'file') {
-          saveTextFile(outputText, filename)
+          saveTextFile(res.data.decrypted_text, filename)
         }
         break
       case 'affine':
@@ -164,7 +176,7 @@ function App() {
           setOutputText(res.data.decrypted_text)
         });
         if (selectedOption === 'file') {
-          saveTextFile(outputText, filename)
+          saveTextFile(res.data.decrypted_text, filename)
         }
         break
       case 'hill':
@@ -208,10 +220,18 @@ function App() {
     } else {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const text = e.target.result;
-        setInputText(btoa(text));
+        const arrayBuffer = e.target.result;
+    
+        const byteArray = new Uint8Array(arrayBuffer);
+
+        console.log("byteArray", byteArray)
+
+        const base64String = btoa(String.fromCharCode.apply(null, byteArray));
+        console.log("Base64 string:", base64String);
+
+        setInputText(base64String);
       };
-      reader.readAsBinaryString(file);
+      reader.readAsArrayBuffer(file);
     }
   }
 
@@ -306,7 +326,13 @@ function App() {
                 Input: {inputText}
               </label>
               <label>
+                Input base64: {btoa(inputText)}
+              </label>
+              <label>
                 Output: {outputText}
+              </label>
+              <label>
+                Output base64: {btoa(outputText)}
               </label>
             </div>
             <div className='buttons'>
