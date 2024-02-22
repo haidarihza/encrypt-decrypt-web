@@ -64,18 +64,12 @@ function App() {
         axios.post(`http://127.0.0.1:5000/vigenere/encrypt`,{plain_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
-          if (selectedOption === 'file') {
-            saveTextFile(res.data.encrypted_text, filename)
-          }
         });
         break
       case 'auto-key-vignere':
         axios.post(`http://127.0.0.1:5000/auto-key-vigenere/encrypt`,{plain_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
-          if (selectedOption === 'file') {
-            saveTextFile(res.data.encrypted_text, filename)
-          }
         });
         break
       case 'extended-vignere':
@@ -91,27 +85,18 @@ function App() {
         axios.post(`http://127.0.0.1:5000/playfair/encrypt`,{plain_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
-          if (selectedOption === 'file') {
-            saveTextFile(res.data.encrypted_text, filename)
-          }
         });
         break
       case 'affine':
         axios.post(`http://127.0.0.1:5000/affine/encrypt`,{plain_text: inputText, m: parseInt(keyM), b:parseInt(keyB)}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
-          if (selectedOption === 'file') {
-            saveTextFile(res.data.encrypted_text, filename)
-          }
         });
         break
       case 'hill':
         axios.post(`http://127.0.0.1:5000/hill/encrypt`,{plain_text: inputText, key: keyMatrix}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
-          if (selectedOption === 'file') {
-            saveTextFile(res.data.encrypted_text, filename)
-          }
         });
         break
       case 'super-encryption':
@@ -133,22 +118,15 @@ function App() {
           console.log(res.data)
           setOutputText(res.data.decrypted_text)
         });
-        if (selectedOption === 'file') {
-          saveTextFile(res.data.decrypted_text, filename)
-        }
         break
       case 'auto-key-vignere':
         axios.post(`http://127.0.0.1:5000/auto-key-vigenere/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.decrypted_text)
         });
-        if (selectedOption === 'file') {
-          saveTextFile(res.data.decrypted_text, filename)
-        }
         break
       case 'extended-vignere':
         if (selectedOption === 'file') {
-
           axios.post(`http://127.0.0.1:5000/extended-vigenere/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
             console.log(res.data)
             setOutputText(res.data.decrypted_text)
@@ -166,27 +144,18 @@ function App() {
           console.log(res.data)
           setOutputText(res.data.decrypted_text)
         });
-        if (selectedOption === 'file') {
-          saveTextFile(res.data.decrypted_text, filename)
-        }
         break
       case 'affine':
         axios.post(`http://127.0.0.1:5000/affine/decrypt`,{cipher_text: inputText,  m: parseInt(keyM), b:parseInt(keyB)}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.decrypted_text)
         });
-        if (selectedOption === 'file') {
-          saveTextFile(res.data.decrypted_text, filename)
-        }
         break
       case 'hill':
         axios.post(`http://127.0.0.1:5000/hill/decrypt`,{cipher_text: inputText,  key: keyMatrix}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.decrypted_text)
         });
-        if (selectedOption === 'file') {
-          saveTextFile(outputText, filename)
-        }
         break
       case 'super-encryption':
         axios.post(`http://127.0.0.1:5000/super/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
@@ -232,6 +201,14 @@ function App() {
         setInputText(base64String);
       };
       reader.readAsArrayBuffer(file);
+    }
+  }
+
+  const handleDownloadFile = () => {
+    if (selectedChiper === 'extended-vignere' || selectedChiper === 'super-encryption') {
+      saveEncryptedFile(outputText, filename)
+    } else {
+      saveTextFile(outputText, filename)
     }
   }
 
@@ -342,17 +319,23 @@ function App() {
         )}
         {selectedOption === 'file' && (
           <div className='content'>
-          {/* <div className='output'>
+          <div className='output'>
             <label>
               Input: {inputText}
             </label>
             <label>
+                Input base64: {btoa(inputText)}
+              </label>
+            <label>
               Output: {outputText}
             </label>
+            <label>
+                Output base64: {btoa(outputText)}
+              </label>
           </div>
           <div className='buttons'>
-            <button onClick={handleSaveBinaryFile}>save as binary file</button>
-          </div> */}
+            <button onClick={handleDownloadFile}>Download File</button>
+          </div>
         </div>
         )}
     </div>
