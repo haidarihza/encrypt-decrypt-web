@@ -88,6 +88,11 @@ function App() {
         });
         break
       case 'affine':
+        //check if m not relative prime with 26
+        if (parseInt(keyM) % 2 === 0 || parseInt(keyM) % 13 === 0) {
+          alert("m must be relative prime with 26")
+          return
+        }
         axios.post(`http://127.0.0.1:5000/affine/encrypt`,{plain_text: inputText, m: parseInt(keyM), b:parseInt(keyB)}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
@@ -146,6 +151,11 @@ function App() {
         });
         break
       case 'affine':
+        //check if m not relative prime with 26
+        if (parseInt(keyM) % 2 === 0 || parseInt(keyM) % 13 === 0) {
+          alert("m must be relative prime with 26")
+          return
+        }        
         axios.post(`http://127.0.0.1:5000/affine/decrypt`,{cipher_text: inputText,  m: parseInt(keyM), b:parseInt(keyB)}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.decrypted_text)
