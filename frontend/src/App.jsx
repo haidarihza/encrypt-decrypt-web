@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import {saveBinaryFile} from './utils/saveBinaryFile.js'
+import {saveBinaryFile, saveTextFile} from './utils/saveFile.js'
 import axios from 'axios'
 
 function App() {
@@ -14,6 +14,7 @@ function App() {
   const [keyMatrixSize, setKeyMatrixSize] = useState(0)
   const [keyMatrix, setKeyMatrix] = useState([[]])
 
+  const [filename, setFilename] = useState('')
   const [outputText, setOutputText] = useState('')
 
   const handleOptionChange = (e) => {
@@ -64,12 +65,18 @@ function App() {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
         });
+        if (selectedOption === 'file') {
+          saveTextFile(outputText, filename)
+        }
         break
       case 'auto-key-vignere':
         axios.post(`http://127.0.0.1:5000/auto-key-vigenere/encrypt`,{plain_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
         });
+        if (selectedOption === 'file') {
+          saveTextFile(outputText, filename)
+        }
         break
       case 'extended-vignere':
         axios.post(`http://127.0.0.1:5000/extended-vigenere/encrypt`,{plain_text: inputText, key: key}).then((res) => {
@@ -82,18 +89,27 @@ function App() {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
         });
+        if (selectedOption === 'file') {
+          saveTextFile(outputText, filename)
+        }
         break
       case 'affine':
         axios.post(`http://127.0.0.1:5000/affine/encrypt`,{plain_text: inputText, m: parseInt(keyM), b:parseInt(keyB)}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
         });
+        if (selectedOption === 'file') {
+          saveTextFile(outputText, filename)
+        }
         break
       case 'hill':
         axios.post(`http://127.0.0.1:5000/hill/encrypt`,{plain_text: inputText, key: keyMatrix}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.encrypted_text)
         });
+        if (selectedOption === 'file') {
+          saveTextFile(outputText, filename)
+        }
         break
       case 'super-encryption':
         axios.post(`http://127.0.0.1:5000/super/encrypt`,{plain_text: inputText, key: key}).then((res) => {
@@ -114,12 +130,18 @@ function App() {
           console.log(res.data)
           setOutputText(res.data.decrypted_text)
         });
+        if (selectedOption === 'file') {
+          saveTextFile(outputText, filename)
+        }
         break
       case 'auto-key-vignere':
         axios.post(`http://127.0.0.1:5000/auto-key-vigenere/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.decrypted_text)
         });
+        if (selectedOption === 'file') {
+          saveTextFile(outputText, filename)
+        }
         break
       case 'extended-vignere':
         axios.post(`http://127.0.0.1:5000/extended-vigenere/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
@@ -132,18 +154,27 @@ function App() {
           console.log(res.data)
           setOutputText(res.data.decrypted_text)
         });
+        if (selectedOption === 'file') {
+          saveTextFile(outputText, filename)
+        }
         break
       case 'affine':
         axios.post(`http://127.0.0.1:5000/affine/decrypt`,{cipher_text: inputText,  m: parseInt(keyM), b:parseInt(keyB)}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.decrypted_text)
         });
+        if (selectedOption === 'file') {
+          saveTextFile(outputText, filename)
+        }
         break
       case 'hill':
         axios.post(`http://127.0.0.1:5000/hill/decrypt`,{cipher_text: inputText,  key: keyMatrix}).then((res) => {
           console.log(res.data)
           setOutputText(res.data.decrypted_text)
         });
+        if (selectedOption === 'file') {
+          saveTextFile(outputText, filename)
+        }
         break
       case 'super-encryption':
         axios.post(`http://127.0.0.1:5000/super/decrypt`,{cipher_text: inputText, key: key}).then((res) => {
@@ -160,6 +191,30 @@ function App() {
     saveBinaryFile(outputText, "output.bin")
   }
 
+  const handleFileChange = (e) => {
+    console.log("File changed", e.target.files[0])
+    const file = e.target.files[0];
+
+    setFilename(file.name);
+    
+    if (file.type === 'text/plain') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result;
+        console.log ("text1", text)
+        setInputText(text);
+      };
+      reader.readAsText(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result;
+        setInputText(btoa(text));
+      };
+      reader.readAsBinaryString(file);
+    }
+  }
+
   return (
     <>
     <div className='title'>
@@ -173,13 +228,23 @@ function App() {
           <option value="file">File</option>
         </select>
       </label>
-      {selectedOption === 'text' ? (
+      {selectedOption === 'text' && (
         <div className='content'>
           <label className='input-text'>
             Text:
             <textarea value={inputText} onChange={handleInputChange}></textarea>
           </label>
+        </div>
+      )}
+      {selectedOption === 'file' && (
+        <div className='content'>
           <label className='input-type'>
+            File:
+            <input type="file" onChange={handleFileChange}/>
+          </label>
+        </div>
+      )}
+        <label className='input-type'>
             Chiper Type : 
             <select value={selectedChiper} onChange={handleChiperChange}>
               <option value="vignere">Vigenere Chiper</option>
@@ -233,7 +298,25 @@ function App() {
             <button onClick={handleEncryptClick}>Encrypt</button>
             <button onClick={handleDecryptClick}>Decrypt</button>
           </div>
-          <div className='output'>
+
+        {selectedOption === 'text' && (
+          <div className='content'>
+            <div className='output'>
+              <label>
+                Input: {inputText}
+              </label>
+              <label>
+                Output: {outputText}
+              </label>
+            </div>
+            <div className='buttons'>
+              <button onClick={handleSaveBinaryFile}>save as binary file</button>
+            </div>
+          </div>
+        )}
+        {selectedOption === 'file' && (
+          <div className='content'>
+          {/* <div className='output'>
             <label>
               Input: {inputText}
             </label>
@@ -243,22 +326,9 @@ function App() {
           </div>
           <div className='buttons'>
             <button onClick={handleSaveBinaryFile}>save as binary file</button>
-          </div>
+          </div> */}
         </div>
-      ) : (
-        <div className='content'>
-          <label>
-            File:
-            <input type="file" />
-          </label>
-          <label>
-            Key:
-            <input type="text" />
-          </label>
-          <button>Encrypt</button>
-          <button>Decrypt</button>
-        </div>
-      )}
+        )}
     </div>
     </>
   )
